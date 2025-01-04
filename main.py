@@ -12,6 +12,8 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
 
+    background = pygame.image.load("assets/background.png").convert()
+
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
     asteroids = pygame.sprite.Group()
@@ -23,7 +25,6 @@ def main():
     asteroid_field = AsteroidField()
 
     Player.containers = (drawable, updatable)
-
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
 
     dt = 0
@@ -47,7 +48,7 @@ def main():
                     asteroid.split()
                     shot.kill()
 
-        screen.fill("black")
+        screen.blit(background, (0,0))
 
         for obj in drawable:
             obj.draw(screen)
