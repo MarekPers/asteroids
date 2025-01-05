@@ -6,6 +6,7 @@ from asteroidfield import AsteroidField
 from shots import Shot
 from score import Score
 from exit import exit_screen
+from explosion import Explosion
 
 
 def main():
@@ -19,6 +20,7 @@ def main():
     drawable = pygame.sprite.Group()
     asteroids = pygame.sprite.Group()
     shots = pygame.sprite.Group()
+    explosions = pygame.sprite.Group()
 
     Shot.containers = (shots, updatable, drawable)
     Asteroid.containers = (asteroids, updatable, drawable)
@@ -43,13 +45,15 @@ def main():
 
         for asteroid in asteroids:
             if asteroid.collides_with(player):
-                exit_screen(screen, score.get_score())  # Przekazanie wyniku do ekranu końcowego
-                main()  # Restart gry
-                return
+                if player.invulnerability_timer <= 0:
+                    explosions.add(Explosion(player.position))
+                player.handle_collision(screen, score, exit_screen, main, asteroids, explosions)
+                break
 
         for asteroid in asteroids:
             for shot in shots:
                 if asteroid.collides_with(shot):
+                    explosions.add(Explosion(asteroid.position))
                     asteroid.split()
                     shot.kill()
                     score.add_points(asteroid.get_points())
@@ -60,6 +64,10 @@ def main():
             obj.draw(screen)
 
         score.draw(screen)
+        player.draw_lives(screen)
+
+        explosions.update(dt)
+        explosions.draw(screen)
 
         pygame.display.flip()
 
