@@ -40,3 +40,11 @@ class Asteroid(CircleShape):
         asteroid_spread = random.uniform(20, 50)
         asteroid_1.velocity = self.velocity.rotate(asteroid_spread) * 1.2
         asteroid_2.velocity = self.velocity.rotate(-asteroid_spread) * 1.2
+
+    def get_points(self):
+        if self.radius > ASTEROID_MIN_RADIUS * 2:
+            return 100
+        elif self.radius > ASTEROID_MIN_RADIUS:
+            return 50
+        else:
+            return 25
