@@ -43,8 +43,8 @@ class Asteroid(CircleShape):
 
     def get_points(self):
         if self.radius > ASTEROID_MIN_RADIUS * 2:
-            return 100
+            return 25
         elif self.radius > ASTEROID_MIN_RADIUS:
             return 50
         else:
-            return 25
+            return 100

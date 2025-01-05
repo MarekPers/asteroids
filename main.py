@@ -1,4 +1,3 @@
-import sys
 import pygame
 from constants import *
 from player import Player
@@ -6,6 +5,7 @@ from asteroid import Asteroid
 from asteroidfield import AsteroidField
 from shots import Shot
 from score import Score
+from exit import exit_screen
 
 
 def main():
@@ -32,6 +32,7 @@ def main():
 
     dt = 0
 
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -42,8 +43,9 @@ def main():
 
         for asteroid in asteroids:
             if asteroid.collides_with(player):
-                print("Game over!")
-                sys.exit()
+                exit_screen(screen, score.get_score())  # Przekazanie wyniku do ekranu końcowego
+                main()  # Restart gry
+                return
 
         for asteroid in asteroids:
             for shot in shots:
