@@ -5,7 +5,7 @@ from asteroid import Asteroid
 from asteroidfield import AsteroidField
 from shots import Shot
 from score import Score
-from exit import exit_screen
+from screens import exit_screen, start_screen, pause_screen
 from utils import Explosion
 
 
@@ -13,8 +13,10 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
-
     background = pygame.image.load("assets/background.png").convert()
+
+    # ekran startowy
+    start_screen(screen)
 
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
@@ -33,12 +35,15 @@ def main():
     score = Score()
 
     dt = 0
+    fps = 0
 
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                pause_screen(screen)
 
         for obj in updatable:
             obj.update(dt)
@@ -64,7 +69,7 @@ def main():
             obj.draw(screen)
 
         score.draw(screen)
-        player.draw_lives(screen)
+        player.draw_lives(screen, fps)
 
         explosions.update(dt)
         explosions.draw(screen)
@@ -73,6 +78,7 @@ def main():
 
         # limit the framerate to 60 FPS
         dt = clock.tick(60) / 1000
+        fps = clock.get_fps()
 
 
 if __name__ == "__main__":

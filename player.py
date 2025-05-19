@@ -87,8 +87,9 @@ class Player(CircleShape):
         shot = Shot(self.position.x, self.position.y)
         shot.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
 
-    def draw_lives(self, screen):
+    def draw_lives(self, screen, fps: float):
         font = pygame.font.Font(None, 36)
-        lives_text = f"LIVES: {self.lives}"
-        text_surface = font.render(lives_text, True, (255, 255, 255))
-        screen.blit(text_surface, (SCREEN_WIDTH - 150, 10))
+        text = f"FPS: {int(fps):>3} | LIVES: {self.lives}"
+        surf = font.render(text, True, (255, 255, 255))
+        # prawy górny róg z 10 px marginesem
+        screen.blit(surf, (SCREEN_WIDTH - surf.get_width() - 10, 10))
