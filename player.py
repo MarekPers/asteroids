@@ -1,8 +1,8 @@
 import pygame
 from constants import *
-from circleshape import CircleShape
+from utils import CircleShape
 from shots import Shot
-from explosion import Explosion
+from utils import Explosion
 
 class Player(CircleShape):
     def __init__(self, x, y, lives=3):

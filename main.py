@@ -6,7 +6,7 @@ from asteroidfield import AsteroidField
 from shots import Shot
 from score import Score
 from exit import exit_screen
-from explosion import Explosion
+from utils import Explosion
 
 
 def main():
