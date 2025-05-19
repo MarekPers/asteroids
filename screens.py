@@ -57,7 +57,7 @@ def pause_screen(screen):
 
 
 def exit_screen(screen, score_value):
-    """GAME OVER – R restart, Q quit."""
+    """GAME OVER - R restart, Q quit."""
     clock = pygame.time.Clock()
     overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
     overlay.fill((0, 0, 0)); overlay.set_alpha(150)
