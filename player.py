@@ -48,7 +48,6 @@ class Player(CircleShape):
         self.buff_until: dict[str, float] = {}
         self.spread_level = 0   # ile dodat. par pocisków
 
-        # ---------------- GPT o3 START ----------------
         # 1) wycinamy bounding‑box dla każdej klatki (usuwa pustą ramkę)
         trimmed_frames: List[pygame.Surface] = []
         for i in range(4):
@@ -68,8 +67,6 @@ class Player(CircleShape):
 
         self._flame_i = 0
         self._flame_timer = 0.0
-
-        # ---------------- GPT o3 END ----------------
 
     # =============================================================
     #                            UPDATE                            

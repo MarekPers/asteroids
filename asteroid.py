@@ -6,9 +6,9 @@ import random
 
 
 class Asteroid(CircleShape):
-    LARGE_ASTEROIDS = ["assets/large_asteroid_1.png", "assets/large_asteroid_2.png", "assets/large_asteroid_3.png"]
-    MEDIUM_ASTEROIDS = ["assets/medium_asteroid_1.png", "assets/medium_asteroid_2.png", "assets/medium_asteroid_3.png"]
-    SMALL_ASTEROIDS = ["assets/small_asteroid_1.png", "assets/small_asteroid_2.png", "assets/small_asteroid_3.png"]
+    LARGE_ASTEROIDS = ["assets/asteroid/large_asteroid_1.png", "assets/asteroid/large_asteroid_2.png", "assets/asteroid/large_asteroid_3.png"]
+    MEDIUM_ASTEROIDS = ["assets/asteroid/medium_asteroid_1.png", "assets/asteroid/medium_asteroid_2.png", "assets/asteroid/medium_asteroid_3.png"]
+    SMALL_ASTEROIDS = ["assets/asteroid/small_asteroid_1.png", "assets/asteroid/small_asteroid_2.png", "assets/asteroid/small_asteroid_3.png"]
 
     def __init__(self, x, y, radius):
         super().__init__(x, y, radius)

@@ -1,0 +1,6 @@
+game_over.wav - https://opengameart.org/content/game-over-theme
+intro.mp3 - https://opengameart.org/content/space-ace
+explosion.wav - https://opengameart.org/content/space-ace
+theme.mp3 - https://opengameart.org/content/grey-sector-8-bit
+laser.wav - https://opengameart.org/content/laser-shot-0
+powerup.wav - https://opengameart.org/content/8-bit-powerup-1
