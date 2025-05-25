@@ -34,9 +34,9 @@ class AsteroidField(pygame.sprite.Sprite):
         self.spawn_mult    = 1.0      # 1 → normalnie
         self._threat_timer = 0.0
 
-    def trigger_threat(self, duration: float = PU_THREAT) -> None:
-        """Aktywuj / przedłuż efekt 'Zagrożenie'."""
-        self.spawn_mult  = ASTEROID_SPAWN_BOOST
+    def trigger_threat(self, duration: float = PU_DURATION[PU_THREAT]) -> None:
+        #Aktywuj / przedłuż efekt 'Zagrożenie'
+        self.spawn_mult   = ASTEROID_SPAWN_BOOST
         self._threat_timer += duration
 
     def spawn(self, radius, position, velocity):

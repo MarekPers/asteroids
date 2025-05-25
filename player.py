@@ -23,6 +23,9 @@ class Player(CircleShape):
         super().__init__(x, y, PLAYER_RADIUS)
         self.asteroid_field = asteroid_field
 
+        self.fast_fire_level = 0        # ile stacków
+        self.fast_fire_until = 0.0      # wspólny timer
+
         # ---------------- parametry ruchu ----------------
         self.rotation: float = 0.0
         self.speed: float = 0.0  # px/s
@@ -164,9 +167,9 @@ class Player(CircleShape):
     def shoot(self):
         if self.shoot_timer > 0:
             return
-        self.shoot_timer = PLAYER_SHOOT_COOLDOWN / (
-            FAST_FIRE_MULT if self.buff_active(PU_FAST_FIRE) else 1
-        )
+        level = self.buff_active(PU_FAST_FIRE, level=True)
+        mult  = FAST_FIRE_MULT ** level if level else 1
+        self.shoot_timer = PLAYER_SHOOT_COOLDOWN / mult
 
         # główny pocisk
         direction = pygame.Vector2(0, -1).rotate(self.rotation)     # ← DODAJ
@@ -217,7 +220,14 @@ class Player(CircleShape):
 
     # ---------------- Power-up API ---------------- #
     def apply_powerup(self, kind: str):
-        now = pygame.time.get_ticks() / 1000  # sekundy
+        now = pygame.time.get_ticks() / 1000
+        dur = PU_DURATION[kind]
+
+        if kind == PU_FAST_FIRE:
+            self.fast_fire_level += 1
+            # przedłuż tyle, by KAŻDY stack dotrwał pełen czas
+            self.fast_fire_until = max(self.fast_fire_until, now) + dur
+            return
 
         # power-up natychmiastowy
         if kind == PU_NOVA:
@@ -237,5 +247,8 @@ class Player(CircleShape):
         elif kind == PU_THREAT:
             self.asteroid_field.trigger_threat()
 
-    def buff_active(self, kind: str) -> bool:
-        return self.buff_until.get(kind, 0) > pygame.time.get_ticks() / 1000
+    def buff_active(self, kind: str, *, level: bool=False):
+        now = pygame.time.get_ticks() / 1000
+        if kind == PU_FAST_FIRE and level:
+            return self.fast_fire_level if now < self.fast_fire_until else 0
+        return now < self.buff_until.get(kind, 0)

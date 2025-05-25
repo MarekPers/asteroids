@@ -32,6 +32,7 @@ PU_NOVA          = "bullet_nova"
 PU_THREAT        = "threat"
 
 POWERUP_SPAWN_INTERVAL = 5.0        # s
+
 POWERUP_RARITY = {
     PU_SPREAD: 0.30,
     PU_SHIELD: 0.25,
@@ -45,7 +46,8 @@ PU_DURATION = {                     # sekundy dla efektów czasowych
     PU_FAST_FIRE: 15,
     PU_SPREAD: 30,
     PU_THREAT: 10,
+    PU_NOVA: 0,
 }
-FAST_FIRE_MULT   = 2.0              # × szybszy fire-rate
+FAST_FIRE_MULT = 2.0                # 2× szybciej
 SPREAD_ANGLE     = 30               # ±° od osi statku
 ASTEROID_SPAWN_BOOST = 2.0          # × częściej przy zagrożeniu
