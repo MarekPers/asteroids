@@ -169,6 +169,5 @@ def main():
         fps = clock.get_fps()
 
 
-
 if __name__ == "__main__":
     main()
