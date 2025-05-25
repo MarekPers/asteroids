@@ -117,7 +117,7 @@ Zmiana tych wartości nie wymaga rekompilacji – wystarczy ponownie uruchomić 
 
 Kod źródłowy udostępniany jest na licencji **MIT** (patrz plik `LICENSE`).
 Grafiki i animacje zostały wygenerowane w programach **Fooocus 2‑5‑0** oral **Dall-E 3** i udostępniane na zasadach *CC‑BY 4.0*.
-Dźwięki pochodzą z bazy **freesound.org** (autorzy wymienieni w `assets/credits.txt`).
+Dźwięki pochodzą z bazy **opengameart.org** (autorzy wymienieni w `assets/credits.txt`).
 
 ---
 
