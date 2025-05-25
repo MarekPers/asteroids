@@ -13,6 +13,7 @@ SFX = {
     "laser":     pygame.mixer.Sound(_p("laser.wav")),
     "explosion": pygame.mixer.Sound(_p("explosion.wav")),
     "game_over": pygame.mixer.Sound(_p("game_over.wav")),
+    "powerup": pygame.mixer.Sound(_p("powerup.wav")),
 }
 
 DEFAULT_SFX_VOL   = 0.5   # 0.0 – 1.0

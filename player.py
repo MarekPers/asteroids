@@ -1,15 +1,7 @@
 import pygame
 import audio
 from typing import List
-from constants import (
-    SCREEN_WIDTH,
-    SCREEN_HEIGHT,
-    PLAYER_RADIUS,
-    PLAYER_TURN_SPEED,
-    PLAYER_SPEED,
-    PLAYER_SHOOT_COOLDOWN,
-    PLAYER_SHOOT_SPEED,
-)
+from constants import *
 from utils import CircleShape, Explosion
 from shots import Shot
 
@@ -47,6 +39,10 @@ class Player(CircleShape):
         sheet = pygame.image.load("assets/thruster_flame_sheet.png").convert_alpha()
         fw, fh = sheet.get_width() // 4, sheet.get_height()
 
+        # --- buffs ---
+        self.buff_until: dict[str, float] = {}
+        self.spread_level = 0   # ile dodat. par pocisków
+
         # ---------------- GPT o3 START ----------------
         # 1) wycinamy bounding‑box dla każdej klatki (usuwa pustą ramkę)
         trimmed_frames: List[pygame.Surface] = []
@@ -74,6 +70,8 @@ class Player(CircleShape):
     #                            UPDATE                            
     # =============================================================
     def update(self, dt: float):
+        if self.spread_level and not self.buff_active(PU_SPREAD):
+            self.spread_level = 0
         self.shoot_timer -= dt
         if self.invulnerability_timer > 0:
             self.invulnerability_timer -= dt
@@ -164,9 +162,23 @@ class Player(CircleShape):
     def shoot(self):
         if self.shoot_timer > 0:
             return
-        self.shoot_timer = PLAYER_SHOOT_COOLDOWN
+        self.shoot_timer = PLAYER_SHOOT_COOLDOWN / (FAST_FIRE_MULT if self.buff_active(PU_FAST_FIRE) else 1)
+
         shot = Shot(self.position.x, self.position.y, self.rotation)
         shot.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
+
+        # spread bullets
+        for i in range(self.spread_level):
+            angle_offset = SPREAD_ANGLE * (i + 1)
+            for sign in (-1, 1):
+                dir2 = direction.rotate(sign * angle_offset)
+                create_bullet(self.position, dir2)
+        audio.play_sfx("laser")
+
+    def fire_nova(self):
+        for angle in range(0, 360, 360 // 100):   # 100 pocisków
+            dir = pygame.Vector2(1, 0).rotate(angle)
+            create_bullet(self.pos, dir)
         audio.play_sfx("laser")
 
     def handle_collision(self, screen, score, exit_screen, restart_game, asteroids, explosions):
@@ -189,3 +201,28 @@ class Player(CircleShape):
         surf = pygame.font.Font(None, 36).render(text, True, (255, 255, 255))
         # odsuwamy 10 px od prawej krawędzi niezależnie od szerokości napisu
         screen.blit(surf, (SCREEN_WIDTH - surf.get_width() - 10, 10))
+
+    # POWER-UP: Tarcza
+    def add_shield(self, extra: float = PU_DURATION[PU_SHIELD]) -> None:
+        self.invulnerability_timer += extra
+
+    # ---------------- Power-up API ---------------- #
+    def apply_powerup(self, kind: str):
+        now = pygame.time.get_ticks() / 1000  # sekundy
+        if kind == PU_NOVA:
+            self.fire_nova()
+            return
+        dur = PU_DURATION[kind]
+        self.buff_until[kind] = self.buff_until.get(kind, now) + dur
+
+        if kind == PU_SPREAD:
+            self.spread_level += 1
+
+        if pu.kind == PU_SHIELD:
+            add_shield()
+
+        if pu.kind == PU_THREAT:
+            asteroid_field.trigger_threat()
+
+    def buff_active(self, kind: str) -> bool:
+        return self.buff_until.get(kind, 0) > pygame.time.get_ticks() / 1000

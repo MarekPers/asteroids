@@ -8,8 +8,9 @@ from asteroidfield import AsteroidField
 from shots import Shot
 from score import Score
 from screens import exit_screen, start_screen, pause_screen
-from utils import Explosion
+from utils import Explosion, random_outside_position, random_velocity
 from ufo import UFO
+from powerups import PowerUp
 
 
 def main():
@@ -18,6 +19,9 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
     background = pygame.image.load("assets/background.png").convert()
+
+    POWERUP_EVENT = pygame.USEREVENT + 1
+    pygame.time.set_timer(POWERUP_EVENT, int(POWERUP_SPAWN_INTERVAL * 1000))
 
     # === Start screen ===
     start_screen(screen)
@@ -29,6 +33,7 @@ def main():
     shots = pygame.sprite.Group()
     ufos = pygame.sprite.Group()
     explosions = pygame.sprite.Group()
+    powerup_group = pygame.sprite.Group()
 
     # === Containers binding ===
     Shot.containers = (shots, updatable, drawable)
@@ -54,6 +59,26 @@ def main():
                 return
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 pause_screen(screen)
+            if event.type == POWERUP_EVENT:
+                spawn_random_powerup()
+
+
+        # -------------- powerups helper --------------
+        def weighted_choice(d: dict[str, float]) -> str:
+            r = random.random()
+            cum = 0
+            for k, w in d.items():
+                cum += w
+                if r < cum:
+                    return k
+            return k  # fallback (nie zajdzie)
+
+        def spawn_random_powerup():
+            pos  = random_outside_position()     # punkt startu poza ekranem
+            vel  = random_velocity(50, 120)      # prędkość w zakresie 50-120 px/s
+            kind = weighted_choice(POWERUP_RARITY)     # wybór typu wg prawdopodobieństw
+            powerup_group.add(PowerUp(pos, vel, kind)) # dodajemy sprite do grupy
+
 
         # -------------- logic --------------
         # update timers
@@ -110,7 +135,16 @@ def main():
                     explosions.add(Explosion(ufo.position))
                     shot.kill()
                     ufo.kill()
+                    if random.random() < 0.5:      # np. 50 % szans na drop powerupa
+                        powerup_group.add(
+                            PowerUp(ufo.position.copy(), random_velocity(80, 120),
+                                    weighted_choice(POWERUP_RARITY))
+                        )
                     score.add_points(ufo.get_points())
+
+        for pu in pygame.sprite.spritecollide(player, powerup_group, dokill=True):
+            player.apply_powerup(pu.kind)
+            audio.play_sfx("powerup")
 
         # -------------- drawing --------------
         screen.blit(background, (0, 0))
