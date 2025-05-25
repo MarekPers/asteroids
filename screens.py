@@ -1,6 +1,7 @@
 import sys
 import pygame
 from constants import *
+import audio
 
 
 def _blit_center(screen, surf, y):
@@ -20,6 +21,7 @@ def start_screen(screen):
             if e.type == pygame.QUIT:
                 pygame.quit(); sys.exit()
             if e.type == pygame.KEYDOWN and e.key in (pygame.K_SPACE, pygame.K_RETURN):
+                audio.theme()   # zatrzyma intro i puści theme.mp3 w pętli
                 return          # ← start gry
 
         screen.blit(background, (0, 0))
@@ -40,6 +42,7 @@ def pause_screen(screen):
     pause_f = pygame.font.Font(None, 100)
     info_f  = pygame.font.Font(None, 50)
 
+
     while True:
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
@@ -57,6 +60,8 @@ def pause_screen(screen):
 
 
 def exit_screen(screen, score_value):
+    audio.stop_music()        # zatrzymaj theme
+    audio.play_sfx("game_over")
     """GAME OVER - R restart, Q quit."""
     clock = pygame.time.Clock()
     overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -75,6 +80,8 @@ def exit_screen(screen, score_value):
                 pygame.quit(); sys.exit()
             if e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_q:
+                    audio.stop_music()
+                    pygame.mixer.quit()
                     pygame.quit(); sys.exit()
                 if e.key == pygame.K_r:
                     return      # ← restart

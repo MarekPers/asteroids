@@ -1,4 +1,5 @@
 import pygame
+import audio
 import random
 from constants import *
 from player import Player
@@ -13,6 +14,7 @@ from ufo import UFO
 
 def main():
     pygame.init()
+    audio.intro()         #  <<< startowa muzyczka
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
     background = pygame.image.load("assets/background.png").convert()

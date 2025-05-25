@@ -1,4 +1,5 @@
 import pygame
+import audio
 
 # Base class for game objects
 class CircleShape(pygame.sprite.Sprite):
@@ -33,7 +34,7 @@ class Explosion(pygame.sprite.Sprite):
         self.spritesheet = pygame.image.load("assets/explosion_sprite_sheet_fixed.png").convert_alpha()
         self.frames = []
         frame_width, frame_height = 128, 128
-        for i in range(12):  # 12 klatek
+        for i in range(6):  # 6 klatek
             frame = self.spritesheet.subsurface((i * frame_width, 0, frame_width, frame_height))
             self.frames.append(frame)
 
@@ -50,6 +51,7 @@ class Explosion(pygame.sprite.Sprite):
             self.timer = 0
             self.current_frame += 1
             if self.current_frame >= len(self.frames):
+                audio.play_sfx("explosion")
                 self.kill()  # Usunięcie obiektu po zakończeniu animacji
             else:
                 self.image = self.frames[self.current_frame]

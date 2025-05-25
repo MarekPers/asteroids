@@ -1,4 +1,5 @@
 import pygame
+import audio
 from typing import List
 from constants import (
     SCREEN_WIDTH,
@@ -166,6 +167,7 @@ class Player(CircleShape):
         self.shoot_timer = PLAYER_SHOOT_COOLDOWN
         shot = Shot(self.position.x, self.position.y, self.rotation)
         shot.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
+        audio.play_sfx("laser")
 
     def handle_collision(self, screen, score, exit_screen, restart_game, asteroids, explosions):
         if self.invulnerability_timer > 0:
