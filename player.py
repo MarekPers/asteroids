@@ -182,6 +182,8 @@ class Player(CircleShape):
             restart_game()
 
     def draw_lives(self, screen: pygame.Surface, fps: float):
-        font = pygame.font.Font(None, 36)
-        txt = f"FPS: {int(fps):>3} | LIVES: {self.lives}"
-        screen.blit(font.render(txt, True, (255, 255, 255)), (SCREEN_WIDTH - 180, 10))
+        """Rysuje FPS oraz liczbę żyć w prawym górnym rogu, zawsze mieszcząc się w ekranie."""
+        text = f"FPS: {int(fps):>3} | LIVES: {self.lives}"
+        surf = pygame.font.Font(None, 36).render(text, True, (255, 255, 255))
+        # odsuwamy 10 px od prawej krawędzi niezależnie od szerokości napisu
+        screen.blit(surf, (SCREEN_WIDTH - surf.get_width() - 10, 10))
