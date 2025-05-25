@@ -15,8 +15,7 @@ Projekt zrealizowany w ramach zaliczenia przedmiotu *Programowanie w języku P
 4. [Sterowanie](#sterowanie)
 5. [Struktura projektu](#struktura-projektu)
 6. [Konfiguracja](#konfiguracja)
-7. [Testy](#testy)
-8. [Licencja i kredyty](#licencja-i-kredyty)
+7. [Licencja i kredyty](#licencja-i-kredyty)
 
 ---
 
