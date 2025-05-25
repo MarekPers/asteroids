@@ -164,7 +164,7 @@ class Player(CircleShape):
         if self.shoot_timer > 0:
             return
         self.shoot_timer = PLAYER_SHOOT_COOLDOWN
-        shot = Shot(self.position.x, self.position.y)
+        shot = Shot(self.position.x, self.position.y, self.rotation)
         shot.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
 
     def handle_collision(self, screen, score, exit_screen, restart_game, asteroids, explosions):
