@@ -43,7 +43,7 @@ def main():
     asteroid_field = AsteroidField()
 
     Player.containers = (drawable, updatable)
-    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, asteroid_field)
 
     PowerUp.containers = (powerup_group, updatable, drawable)
 
@@ -54,22 +54,24 @@ def main():
     fps = 0
     ufo_spawn_timer = random.uniform(UFO_MIN_SPAWN_TIME, UFO_MAX_SPAWN_TIME)
 
-    # -------------- powerups helper --------------
-def weighted_choice(d: dict[str, float]) -> str:
-    r = random.random()
-    cum = 0
-    for k, w in d.items():
-        cum += w
-        if r < cum:
-            return k
-    return k  # fallback (nie zajdzie)
 
-def spawn_random_powerup():
-    pos  = random_outside_position()     # punkt startu poza ekranem
-    vel  = random_velocity(50, 120)      # prędkość w zakresie 50-120 px/s
-    kind = weighted_choice(POWERUP_RARITY)     # wybór typu wg prawdopodobieństw
-    powerup_group.add(PowerUp(pos, vel, kind)) # dodajemy sprite do grupy
-    
+    # -------------- powerups helper --------------
+    def weighted_choice(d: dict[str, float]) -> str:
+        r = random.random()
+        cum = 0
+        for k, w in d.items():
+            cum += w
+            if r < cum:
+                return k
+        return k  # fallback (nie zajdzie)
+
+    def spawn_random_powerup():
+        pos  = random_outside_position()     # punkt startu poza ekranem
+        vel  = random_velocity(50, 120)      # prędkość w zakresie 50-120 px/s
+        kind = weighted_choice(POWERUP_RARITY)     # wybór typu wg prawdopodobieństw
+        powerup_group.add(PowerUp(pos, vel, kind)) # dodajemy sprite do grupy
+
+        
 
     while True:
         # -------------- events --------------
@@ -165,6 +167,10 @@ def spawn_random_powerup():
         # limit the framerate to 60 FPS
         dt = clock.tick(60) / 1000
         fps = clock.get_fps()
+
+
+
+
 
 
 if __name__ == "__main__":

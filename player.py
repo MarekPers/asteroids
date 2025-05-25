@@ -19,8 +19,9 @@ class Player(CircleShape):
     # -------- wstępnie zdefiniowane skale dla płomienia --------
     _FLAME_SCALES = (0.8, 1.0, 1.2, 1.4, 1.6)
 
-    def __init__(self, x: float, y: float, lives: int = 3):
+    def __init__(self, x: float, y: float, asteroid_field: AsteroidField, lives: int = 3):
         super().__init__(x, y, PLAYER_RADIUS)
+        self.asteroid_field = asteroid_field
 
         # ---------------- parametry ruchu ----------------
         self.rotation: float = 0.0
@@ -163,23 +164,30 @@ class Player(CircleShape):
     def shoot(self):
         if self.shoot_timer > 0:
             return
-        self.shoot_timer = PLAYER_SHOOT_COOLDOWN / (FAST_FIRE_MULT if self.buff_active(PU_FAST_FIRE) else 1)
+        self.shoot_timer = PLAYER_SHOOT_COOLDOWN / (
+            FAST_FIRE_MULT if self.buff_active(PU_FAST_FIRE) else 1
+        )
 
+        # główny pocisk
+        direction = pygame.Vector2(0, -1).rotate(self.rotation)     # ← DODAJ
         shot = Shot(self.position.x, self.position.y, self.rotation)
-        shot.velocity = pygame.Vector2(0, -1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
+        shot.velocity = direction * PLAYER_SHOOT_SPEED
 
-        # spread bullets
+        # dodatkowe pociski dla power-upa Spread
         for i in range(self.spread_level):
             angle_offset = SPREAD_ANGLE * (i + 1)
             for sign in (-1, 1):
                 dir2 = direction.rotate(sign * angle_offset)
-                create_bullet(self.position, dir2)
+                extra = Shot(self.position.x, self.position.y, self.rotation + sign * angle_offset)
+                extra.velocity = dir2 * PLAYER_SHOOT_SPEED
+
         audio.play_sfx("laser")
 
     def fire_nova(self):
-        for angle in range(0, 360, 360 // 100):   # 100 pocisków
-            dir = pygame.Vector2(1, 0).rotate(angle)
-            create_bullet(self.pos, dir)
+        for angle in range(0, 360, 360 // 100):
+            dir_vec = pygame.Vector2(1, 0).rotate(angle)
+            nova_shot = Shot(self.position.x, self.position.y, angle)
+            nova_shot.velocity = dir_vec * PLAYER_SHOOT_SPEED
         audio.play_sfx("laser")
 
     def handle_collision(self, screen, score, exit_screen, restart_game, asteroids, explosions):
@@ -210,20 +218,24 @@ class Player(CircleShape):
     # ---------------- Power-up API ---------------- #
     def apply_powerup(self, kind: str):
         now = pygame.time.get_ticks() / 1000  # sekundy
+
+        # power-up natychmiastowy
         if kind == PU_NOVA:
             self.fire_nova()
             return
+        
+        # zapis/odświeżenie timera buffa
         dur = PU_DURATION[kind]
         self.buff_until[kind] = self.buff_until.get(kind, now) + dur
 
         if kind == PU_SPREAD:
             self.spread_level += 1
 
-        if kind == PU_SHIELD:
+        elif kind == PU_SHIELD:
             self.add_shield()
 
-        if kind == PU_THREAT:
-            AsteroidField.trigger_threat()
+        elif kind == PU_THREAT:
+            self.asteroid_field.trigger_threat()
 
     def buff_active(self, kind: str) -> bool:
         return self.buff_until.get(kind, 0) > pygame.time.get_ticks() / 1000
