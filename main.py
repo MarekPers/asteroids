@@ -38,12 +38,14 @@ def main():
     # === Containers binding ===
     Shot.containers = (shots, updatable, drawable)
     Asteroid.containers = (asteroids, updatable, drawable)
-    AsteroidField.containers = (updatable)
+    AsteroidField.containers = (updatable,)
     UFO.containers = (ufos, updatable, drawable)
     asteroid_field = AsteroidField()
 
     Player.containers = (drawable, updatable)
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+
+    PowerUp.containers = (powerup_group, updatable, drawable)
 
     score = Score()
 
@@ -51,6 +53,23 @@ def main():
     dt = 0
     fps = 0
     ufo_spawn_timer = random.uniform(UFO_MIN_SPAWN_TIME, UFO_MAX_SPAWN_TIME)
+
+    # -------------- powerups helper --------------
+def weighted_choice(d: dict[str, float]) -> str:
+    r = random.random()
+    cum = 0
+    for k, w in d.items():
+        cum += w
+        if r < cum:
+            return k
+    return k  # fallback (nie zajdzie)
+
+def spawn_random_powerup():
+    pos  = random_outside_position()     # punkt startu poza ekranem
+    vel  = random_velocity(50, 120)      # prędkość w zakresie 50-120 px/s
+    kind = weighted_choice(POWERUP_RARITY)     # wybór typu wg prawdopodobieństw
+    powerup_group.add(PowerUp(pos, vel, kind)) # dodajemy sprite do grupy
+    
 
     while True:
         # -------------- events --------------
@@ -61,23 +80,6 @@ def main():
                 pause_screen(screen)
             if event.type == POWERUP_EVENT:
                 spawn_random_powerup()
-
-
-        # -------------- powerups helper --------------
-        def weighted_choice(d: dict[str, float]) -> str:
-            r = random.random()
-            cum = 0
-            for k, w in d.items():
-                cum += w
-                if r < cum:
-                    return k
-            return k  # fallback (nie zajdzie)
-
-        def spawn_random_powerup():
-            pos  = random_outside_position()     # punkt startu poza ekranem
-            vel  = random_velocity(50, 120)      # prędkość w zakresie 50-120 px/s
-            kind = weighted_choice(POWERUP_RARITY)     # wybór typu wg prawdopodobieństw
-            powerup_group.add(PowerUp(pos, vel, kind)) # dodajemy sprite do grupy
 
 
         # -------------- logic --------------

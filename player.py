@@ -4,6 +4,7 @@ from typing import List
 from constants import *
 from utils import CircleShape, Explosion
 from shots import Shot
+from asteroidfield import AsteroidField
 
 
 class Player(CircleShape):
@@ -218,11 +219,11 @@ class Player(CircleShape):
         if kind == PU_SPREAD:
             self.spread_level += 1
 
-        if pu.kind == PU_SHIELD:
-            add_shield()
+        if kind == PU_SHIELD:
+            self.add_shield()
 
-        if pu.kind == PU_THREAT:
-            asteroid_field.trigger_threat()
+        if kind == PU_THREAT:
+            AsteroidField.trigger_threat()
 
     def buff_active(self, kind: str) -> bool:
         return self.buff_until.get(kind, 0) > pygame.time.get_ticks() / 1000
