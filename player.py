@@ -1,3 +1,16 @@
+"""
+player.py
+
+Moduł obsługujący statek gracza - klasę `Player`.
+
+Zawiera logikę:
+- sterowania (rotacja, przyspieszanie, hamowanie) z płynną fizyką,
+- animacji płomieni silnika zależnej od prędkości (5 dyskretnych rozmiarów),
+- zarządzania życiem, tarczą niewrażliwości oraz kolizjami,
+- strzelania pociskami, w tym buff "szybkostrzelność" i "spread shot",
+- obsługi różnorodnych power-upów oraz komunikacji z "AsteroidField".
+"""
+
 import pygame
 import audio
 from typing import List
@@ -8,29 +21,42 @@ from asteroidfield import AsteroidField
 
 
 class Player(CircleShape):
-    """Sterowanie statkiem z płynną akceleracją
-    i płomieniem silnika o **dyskretnych poziomach wielkości** (bez skalowania w locie),
-    co eliminuje artefakt prostokątnej ramki przy przezroczystym tle.
+    """Klasa reprezentująca statek gracza.
 
-    Redukcja artefaktów płomieni napisana z użyciem GPT o3 od OpenAI.
-
-    Dodatkowo: migająca tarcza niewrażliwości."""
+    Dziedziczy po `CircleShape`, aby korzystać ze wspólnej kolizyjnej
+    geometrii (promień, pozycja jako `Vector2`).  Oprócz cech bazowych
+    przechowuje również indywidualne parametry ruchu, animację płomienia
+    oraz buffy wzmacniające.
+    """
 
     # -------- wstępnie zdefiniowane skale dla płomienia --------
     _FLAME_SCALES = (0.8, 1.0, 1.2, 1.4, 1.6)
 
     def __init__(self, x: float, y: float, asteroid_field: AsteroidField, lives: int = 3):
+        """Inicjalizacja statku.
+
+        Parametry
+        ---------
+        x, y : float
+            Współrzędne startowe.
+        asteroid_field : AsteroidField
+            Referencja do pola asteroid, aby móc generować wybuchy i buffy.
+        lives : int, default 3
+            Liczba żyć na start.
+        """
         super().__init__(x, y, PLAYER_RADIUS)
         self.asteroid_field = asteroid_field
 
+        # --- zmienne szybkostrzelności -------------
         self.fast_fire_level = 0        # ile stacków
         self.fast_fire_until = 0.0      # wspólny timer
 
         # ---------------- parametry ruchu ----------------
-        self.rotation: float = 0.0
-        self.speed: float = 0.0  # px/s
-        self._ACCEL: float = PLAYER_SPEED * 2  # przyspieszenie (0‑>Vmax w ~0,5 s)
+        self.rotation: float = 0.0      # w stopniach, 0 znaczy „w górę”
+        self.speed: float = 0.0         # obecna prędkość (px/s)
+        self._ACCEL: float = PLAYER_SPEED * 2  # przyspieszenie (0‑>Vmax w ~0,5 s)
 
+        # --------------- timery gry ----------------
         self.shoot_timer: float = 0.0
         self.invulnerability_timer: float = 0.0
         self.lives: int = lives
@@ -44,9 +70,13 @@ class Player(CircleShape):
         sheet = pygame.image.load("assets/thruster_flame_sheet.png").convert_alpha()
         fw, fh = sheet.get_width() // 4, sheet.get_height()
 
-        # --- buffs ---
+        # --- buffy ---
         self.buff_until: dict[str, float] = {}
         self.spread_level = 0   # ile dodat. par pocisków
+
+    # =============================================================
+    # Naprawa artefaktów płomieni (usunięcie białych boxów animacji)                            
+    # =============================================================
 
         # 1) wycinamy bounding‑box dla każdej klatki (usuwa pustą ramkę)
         trimmed_frames: List[pygame.Surface] = []
@@ -65,6 +95,7 @@ class Player(CircleShape):
             ]
             self.flame_frames_by_scale.append(scaled_frames)
 
+        # animacyjny stan wewnętrzny płomienia
         self._flame_i = 0
         self._flame_timer = 0.0
 
@@ -72,9 +103,18 @@ class Player(CircleShape):
     #                            UPDATE                            
     # =============================================================
     def update(self, dt: float):
+        """Aktualizuj logikę statku.
+        Wywoływana co klatkę przez pętlę główną - `dt` (delta time) to odstęp czasu w sekundach.
+        """
         if self.spread_level and not self.buff_active(PU_SPREAD):
             self.spread_level = 0
+        
+        # ---------- strzelanie ----------
         self.shoot_timer -= dt
+        if keys[pygame.K_SPACE]:
+            self.shoot()
+
+        # ---------- tarcza ----------
         if self.invulnerability_timer > 0:
             self.invulnerability_timer -= dt
 
@@ -93,6 +133,7 @@ class Player(CircleShape):
         elif thrust_back:
             self.speed = max(self.speed - self._ACCEL * dt, -PLAYER_SPEED * 0.5)
         else:
+            # pasywne wytracanie prędkości (proporcjonalne)
             decel = self._ACCEL * 1.5 * dt
             if self.speed > 0:
                 self.speed = max(0, self.speed - decel)
@@ -102,6 +143,7 @@ class Player(CircleShape):
         # ---------- ruch & screen‑wrap ----------
         forward = pygame.Vector2(0, -1).rotate(self.rotation)
         self.position += forward * self.speed * dt
+        # wyjście poza ekran po jednej stronie – pojawienie się po przeciwnej
         if self.position.x < -self.radius:
             self.position.x = SCREEN_WIDTH + self.radius
         elif self.position.x > SCREEN_WIDTH + self.radius:
@@ -121,19 +163,17 @@ class Player(CircleShape):
         else:
             self._flame_timer, self._flame_i = 0, 0
 
-        # ---------- strzelanie ----------
-        if keys[pygame.K_SPACE]:
-            self.shoot()
 
     # =============================================================
     #                             DRAW                            
     # =============================================================
     def draw(self, screen: pygame.Surface):
+        """Renderuj statek i płomienie na podanym ekranie Pygame."""
         rotated_ship = pygame.transform.rotate(self.image, -self.rotation)
         ship_rect = rotated_ship.get_rect(center=self.position)
 
-        # --------- płomień - GPT o3 ---------
-        if abs(self.speed) > 1:
+        # --------- płomień ---------
+        if abs(self.speed) > 1:     # wyświetlaj tylko przy sensownej prędkości
             speed_ratio = abs(self.speed) / PLAYER_SPEED
             # wybór poziomu skalowania (0‑4)
             scale_idx = min(4, int(speed_ratio * (len(self._FLAME_SCALES) - 1) + 0.5))
@@ -155,13 +195,14 @@ class Player(CircleShape):
         # --------- statek ---------
         screen.blit(rotated_ship, ship_rect.topleft)
 
-    # =============================================================
-    #                           HELPERS                           
-    # =============================================================
     def rotate(self, dt: float):
         self.rotation += PLAYER_TURN_SPEED * dt
 
+    # =============================================================
+    #                        GAMEPLAY ACTIONS                      
+    # =============================================================
     def shoot(self):
+        """Stwórz pociski w aktualnym kierunku - uwzględnia buffy."""
         if self.shoot_timer > 0:
             return
         level = self.buff_active(PU_FAST_FIRE, level=True)
@@ -191,6 +232,7 @@ class Player(CircleShape):
         audio.play_sfx("laser")
 
     def handle_collision(self, screen, score, exit_screen, restart_game, asteroids, explosions):
+        # Obsługa kolizji
         if self.invulnerability_timer > 0:
             return
         self.lives -= 1
@@ -201,6 +243,7 @@ class Player(CircleShape):
                 asteroid.kill()
                 score.add_points(asteroid.get_points())
         if self.lives <= 0:
+            # Jeśli gracz osiągnie 0 żyć - ginie i pojawia się ekran końcowy
             exit_screen(screen, score.get_score())
             restart_game()
 
