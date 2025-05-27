@@ -69,5 +69,5 @@ PU_DURATION = {
 }
 
 FAST_FIRE_MULT     = 2.0  # × – mnożnik szybkości strzału podczas FAST_FIRE
-SPREAD_ANGLE       = 30   # ° – maks. odchylenie bocznych pocisków
+SPREAD_ANGLE       = 10   # ° – maks. odchylenie bocznych pocisków
 ASTEROID_SPAWN_BOOST = 2.0  # × – przy THREAT: asteroid dwa razy więcej
