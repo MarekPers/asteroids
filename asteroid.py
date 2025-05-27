@@ -1,11 +1,13 @@
-# ---------------------------------------------
-#  asteroid.py
-#  Moduł odpowiedzialny za definicję klasy Asteroid,
-#  która dziedziczy po klasie CircleShape i reprezentuje
-#  pojedynczą asteroidę poruszającą się po ekranie.
-#  Zawiera logikę inicjalizacji grafiki, poruszania się,
-#  dzielenia na mniejsze fragmenty oraz naliczania punktów.
-# ---------------------------------------------
+'''
+asteroid.py
+
+Moduł odpowiedzialny za definicję klasy Asteroid,
+która dziedziczy po klasie CircleShape i reprezentuje
+pojedynczą asteroidę poruszającą się po ekranie.
+Zawiera logikę inicjalizacji grafiki, poruszania się,
+dzielenia na mniejsze fragmenty oraz naliczania punktów.
+'''
+
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT
 import pygame
 from utils import CircleShape
@@ -13,18 +15,17 @@ from constants import *
 import random
 
 
-# Klasa Asteroid odpowiada za tworzenie, rysowanie i
-# zarządzanie zachowaniem pojedynczej asteroidy.
 class Asteroid(CircleShape):
-    
-    # Sciezki do grafik asteroid w 3 wariantach
+    # Klasa Asteroid odpowiada za tworzenie, rysowanie i
+    # zarządzanie zachowaniem pojedynczej asteroidy.
+
     LARGE_ASTEROIDS = ["assets/asteroid/large_asteroid_1.png", "assets/asteroid/large_asteroid_2.png", "assets/asteroid/large_asteroid_3.png"]
     MEDIUM_ASTEROIDS = ["assets/asteroid/medium_asteroid_1.png", "assets/asteroid/medium_asteroid_2.png", "assets/asteroid/medium_asteroid_3.png"]
     SMALL_ASTEROIDS = ["assets/asteroid/small_asteroid_1.png", "assets/asteroid/small_asteroid_2.png", "assets/asteroid/small_asteroid_3.png"]
 
-    # Konstruktor przyjmuje początkową pozycję i promień,
-    # ustala odpowiedni obrazek oraz kierunek ruchu.
     def __init__(self, x, y, radius):
+        # Konstruktor przyjmuje początkową pozycję i promień,
+        # ustala odpowiedni obrazek oraz kierunek ruchu.
         super().__init__(x, y, radius)
         
         if self.radius > ASTEROID_MIN_RADIUS * 2:
@@ -38,12 +39,12 @@ class Asteroid(CircleShape):
         self.image = pygame.transform.scale(self.image, (self.radius * 2, self.radius * 2))
         self.rect = self.image.get_rect(center=(x, y))
    
-    # Rysuje asteroidę na przekazanym ekranie w jej aktualnej pozycji.
     def draw(self, screen):
+        # Rysuje asteroidę na przekazanym ekranie w jej aktualnej pozycji.
         screen.blit(self.image, self.rect.topleft)
 
-    # Aktualizuje pozycję asteroidy i stosuje efekt zawijania ekranu.
     def update(self, dt):
+        # Aktualizuje pozycję asteroidy i stosuje efekt zawijania ekranu.
         self.position += self.velocity * dt
         # Screen wrapping
         if self.position.x < -self.radius:
@@ -56,9 +57,9 @@ class Asteroid(CircleShape):
             self.position.y = -self.radius
         self.rect.center = self.position
 
-    # Jeśli asteroida jest wystarczająco duża, rozdziela ją na dwie mniejsze,
-    # tworząc nowe obiekty z mniejszym promieniem i odchylonym wektorem prędkości.
     def split(self):
+        # Jeśli asteroida jest wystarczająco duża, rozdziela ją na dwie mniejsze,
+        # tworząc nowe obiekty z mniejszym promieniem i odchylonym wektorem prędkości.
         self.kill()
         if self.radius <= ASTEROID_MIN_RADIUS:
             return
@@ -69,9 +70,9 @@ class Asteroid(CircleShape):
         asteroid_1.velocity = self.velocity.rotate(asteroid_spread) * 1.2
         asteroid_2.velocity = self.velocity.rotate(-asteroid_spread) * 1.2
 
-    # Zwraca liczbę punktów przyznawanych graczowi za zniszczenie asteroidy
-    # w zależności od jej aktualnego rozmiaru.
     def get_points(self):
+        # Zwraca liczbę punktów przyznawanych graczowi za zniszczenie asteroidy
+        # w zależności od jej aktualnego rozmiaru.
         if self.radius > ASTEROID_MIN_RADIUS * 2:
             return 25
         elif self.radius > ASTEROID_MIN_RADIUS:
