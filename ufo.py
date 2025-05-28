@@ -20,7 +20,7 @@ class UFO(CircleShape):
         # Ruch w poziomie
         self.position += self.velocity * dt
 
-        # Prosty sinusoidalny dryf w pionie (opcjonalnie)
+        # Prosty sinusoidalny dryf w pionie
         self.position.y += math.sin(pygame.time.get_ticks() * 0.002) * 0.3
 
         # Po opuszczeniu ekranu – usuń obiekt

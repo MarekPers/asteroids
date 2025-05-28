@@ -2,10 +2,20 @@ import pygame
 import audio
 import random
 
-# Base class for game objects
+# ------------------------------------------------------------
+#  Klasa bazowa dla sprite'ów o kolistym kształcie
+#  (proste sprawdzanie kolizji na podstawie sumy promieni).
+# ------------------------------------------------------------
 class CircleShape(pygame.sprite.Sprite):
+    """
+    Sprite reprezentujący okrągły obiekt w przestrzeni 2D.
+    Dostarcza wspólną obsługę pozycji, prędkości, promienia i kolizji
+    dla asteroid, pocisków, statku gracza czy UFO.
+    """
     def __init__(self, x, y, radius):
-        # we will be using this later
+        # ten atrybut pozwala klasom potomnym wskazać grupy sprite'ów
+        # (poprzez zmienną klasową `containers`), do których obiekt ma
+        # zostać automatycznie dodany podczas inicjalizacji.
         if hasattr(self, "containers"):
             super().__init__(self.containers)
         else:
@@ -18,24 +28,28 @@ class CircleShape(pygame.sprite.Sprite):
     def collides_with(self, obj2):
         distance = self.position.distance_to(obj2.position)
         return distance <= (self.radius + obj2.radius)
-        #return True or False
+        # zwraca True lub False
 
     def draw(self, screen):
-        # sub-classes must override
+        # metoda powinna zostać nadpisana w klasie dziedziczącej
         pass
 
     def update(self, dt):
-        # sub-classes must override
+        # metoda powinna zostać nadpisana w klasie dziedziczącej
         pass
 
 
 class Explosion(pygame.sprite.Sprite):
+    """
+    Animowany sprite wybuchu, który po odtworzeniu wszystkich klatek
+    usuwa się automatycznie z grup sprite'ów i odtwarza efekt dźwiękowy.
+    """
     def __init__(self, position):
         super().__init__()
         self.spritesheet = pygame.image.load("assets/explosion_sprite_sheet_fixed.png").convert_alpha()
         self.frames = []
         frame_width, frame_height = 128, 128
-        for i in range(6):  # 6 klatek
+        for i in range(6):  # 6 klatek animacji
             frame = self.spritesheet.subsurface((i * frame_width, 0, frame_width, frame_height))
             self.frames.append(frame)
 
@@ -43,7 +57,7 @@ class Explosion(pygame.sprite.Sprite):
         self.position = position
         self.image = self.frames[self.current_frame]
         self.rect = self.image.get_rect(center=position)
-        self.animation_speed = 0.1  # Czas pomiędzy klatkami
+        self.animation_speed = 0.1  # odstęp czasu między klatkami (sekundy)
         self.timer = 0
 
     def update(self, dt):
@@ -59,15 +73,18 @@ class Explosion(pygame.sprite.Sprite):
 
     
 def random_velocity(min_speed: float, max_speed: float) -> pygame.Vector2:
-    """Losuje wektor o module z zakresu <min_speed, max_speed> i losowym kierunku."""
+    """ Zwraca wektor `pygame.Vector2` o losowym kierunku i prędkości z podanego zakresu. """
     angle  = random.uniform(0, 360)
     speed  = random.uniform(min_speed, max_speed)
     return pygame.Vector2(speed, 0).rotate(angle)
 
+
 def random_outside_position(margin: int = 50) -> pygame.Vector2:
     """
-    Zwraca współrzędne punktu tuż poza krawędzią ekranu,
-    aby obiekt 'wlatywał' do środka.
+    Losuje punkt znajdujący się poza granicami ekranu o podanym marginesie.
+
+    margin : int, opcjonalny
+        Liczba pikseli określająca odległość od krawędzi (domyślnie 50).
     """
     screen = pygame.display.get_surface().get_rect()
     side   = random.choice(("top", "bottom", "left", "right"))
