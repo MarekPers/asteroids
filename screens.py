@@ -1,3 +1,17 @@
+"""
+screens.py
+
+Moduł odpowiedzialny za **ekrany interfejsu** gry:
+
+• `start_screen`      - ekran tytułowy, wyświetlany przed rozpoczęciem rozgrywki;  
+  zatrzymuje się, dopóki gracz nie naciśnie **SPACE** lub **ENTER**.  
+• `pause_screen`      - pół-transparentna plansza pauzy; wraca do gry po **ESC**, 
+• `game_over_screen`  - podsumowanie wyniku i opcja restartu (**R**) lub wyjścia (**Q**).
+
+Każda funkcja jest *blokująca* - zatrzymuje główną pętlę gry,
+dopóki użytkownik nie wybierze jednej z dozwolonych akcji.
+"""
+
 import sys
 import pygame
 from constants import *
@@ -5,25 +19,29 @@ import audio
 
 
 def _blit_center(screen, surf, y):
+    # Pomocnicze wyrównanie poziome
     rect = surf.get_rect(center=(SCREEN_WIDTH // 2, y))
     screen.blit(surf, rect)
 
 
 def start_screen(screen):
-    """Pokazuje tytuł i czeka na SPACE / ENTER."""
+    """Ekran tytułowy - czeka na SPACE / ENTER."""
+    # Przygotowanie zasobów
     clock = pygame.time.Clock()
     background = pygame.image.load("assets/background.png").convert()
-    title_f  = pygame.font.Font(None, 120)
-    info_f   = pygame.font.Font(None, 50)
+    title_f  = pygame.font.Font(None, 120)  # duży, nagłówkowy font
+    info_f   = pygame.font.Font(None, 50)   # mniejszy font dla podpowiedzi
 
+    # Główna pętla ekranu tytułowego
     while True:
         for e in pygame.event.get():
-            if e.type == pygame.QUIT:
+            if e.type == pygame.QUIT:       # zamknięcie okna
                 pygame.quit(); sys.exit()
             if e.type == pygame.KEYDOWN and e.key in (pygame.K_SPACE, pygame.K_RETURN):
                 audio.theme()   # zatrzyma intro i puści theme.mp3 w pętli
                 return          # ← start gry
 
+        # Rysowanie tła i tekstów
         screen.blit(background, (0, 0))
         _blit_center(screen, title_f.render("ASTEROIDS", True, (255, 255, 255)),
                      SCREEN_HEIGHT // 2 - 80)
@@ -37,7 +55,7 @@ def pause_screen(screen):
     """Przyciemnia ekran i czeka na ESC, by wrócić do gry."""
     clock = pygame.time.Clock()
     overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
-    overlay.fill((0, 0, 0)); overlay.set_alpha(150)
+    overlay.fill((0, 0, 0)); overlay.set_alpha(150)     # delikatne ściemnienie
 
     pause_f = pygame.font.Font(None, 100)
     info_f  = pygame.font.Font(None, 50)
@@ -45,7 +63,7 @@ def pause_screen(screen):
 
     while True:
         for e in pygame.event.get():
-            if e.type == pygame.QUIT:
+            if e.type == pygame.QUIT:       # wyjście z gry
                 pygame.quit(); sys.exit()
             if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
                 return          # ← kontynuacja gry
