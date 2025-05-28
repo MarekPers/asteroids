@@ -18,7 +18,6 @@ class Shot(CircleShape):
             Shot._base_image = pygame.image.load(self.SPRITE_PATH).convert_alpha()
 
         # dopasuj wielkość pocisku do promienia
-        # zakładamy, że sprite jest poziomy (w prawo). Skalujemy do szerokości 4×radius.
         w = int(self.radius * 4)
         h = int(self.radius * 1.4)
         self.image_original = pygame.transform.smoothscale(Shot._base_image, (w, h))
