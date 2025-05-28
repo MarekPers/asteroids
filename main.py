@@ -1,8 +1,8 @@
 """
 main.py
 
-Główny plik uruchomieniowy gry **Asteroids** napisanej w Pygame.
-Realizuje klasyczny wzorzec *game loop*: inicjalizuje bibliotekę,
+Główny plik uruchomieniowy gry "Asteroids" napisanej w Pygame.
+Realizuje klasyczny wzorzec game loop: inicjalizuje bibliotekę,
 przygotowuje wszystkie obiekty (grupy sprite'ów), a następnie w pętli
 kolejno 
 (1) przetwarza zdarzenia użytkownika, 
